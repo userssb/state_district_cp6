@@ -158,3 +158,5 @@ app.get("/districts/:districtId/details/", async (request, response) => {
   const getStateArray = await db.get(getStateQuery);
   response.send({ stateName: getStateArray.state_name });
 });
+
+module.exports=app;
