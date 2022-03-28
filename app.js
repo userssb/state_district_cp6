@@ -25,12 +25,43 @@ const initializeDBAndServer = async () => {
 };
 initializeDBAndServer();
 
+//converting states db object to response object
+const convertStateDBObjectToResponseObject = (dbObj) => {
+  return {
+    stateId: dbObj.state_id,
+    stateName: dbObj.state_name,
+    population: dbObj.population,
+  };
+};
+
+//converting districts db object to response object
+const convertDistrictDBObjectToResponseObject = (dbObj) => {
+  return {
+    districtId: dbObj.district_id,
+    districtName: dbObj.district_name,
+    stateId: dbObj.state_id,
+    cases: dbObj.cases,
+    cured: dbObj.cured,
+    active: dbObj.active,
+    deaths: dbObj.deaths,
+  };
+};
+
 //API 1 ***  Path: /states/  *** Method: GET
 app.get("/states/", async (request, response) => {
   const getStatesQuery = `
     select * from state order by state_name;`;
   const statesArray = await db.all(getStatesQuery);
-  response.send(statesArray);
+  /*response.send({
+    stateId: statesArray["state_id"],
+    stateName: statesArray["state_name"],
+    population: statesArray["population"],
+  });*/
+  response.send(
+    statesArray.map((eachState) =>
+      convertStateDBObjectToResponseObject(eachState)
+    )
+  );
 });
 
 //API *** 2 Path: /states/:stateId/ *** Method: GET
@@ -38,7 +69,12 @@ app.get("/states/:stateId/", async (request, response) => {
   const { stateId } = request.params;
   const getStateQuery = `select * from state where state_id=${stateId};`;
   const state = await db.get(getStateQuery);
-  response.send(state);
+  response.send({
+    StateId: state["state_id"],
+    stateName: state["state_name"],
+    population: state["population"],
+  });
+  //response.send(state);
 });
 
 //API 3 *** Path: /districts/ *** Method: POST
@@ -84,7 +120,12 @@ app.get("/districts/", async (request, response) => {
   const getDistrictsQuery = `
     select * from district order by district_id;`;
   const districtsArray = await db.all(getDistrictsQuery);
-  response.send(districtsArray);
+  response.send(
+    districtsArray.map((eachDistrict) =>
+      convertDistrictDBObjectToResponseObject(eachDistrict)
+    )
+  );
+  //response.send(districtsArray);
 });
 
 //API 5 *** Path: /districts/:districtId/ *** Method: DELETE
@@ -159,4 +200,4 @@ app.get("/districts/:districtId/details/", async (request, response) => {
   response.send({ stateName: getStateArray.state_name });
 });
 
-module.exports=app;
+module.exports = app;
